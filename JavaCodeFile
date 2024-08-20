@@ -1,0 +1,257 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+class EmployeeAttendanceTracker {
+    private TreeMap<String, String> employeeData; // TreeMap to store employee data (ID -> Name)
+    private Map<LocalDate, LinkedHashSet<String>> attendanceRecords; // Map to store attendance records for each day and linkedhashset used to create new sample for new registration 
+    private Set<String> registeredEmployeeIds; // Set to store registered employee IDs
+    private final String CSV_FOLDER = "C:\\"; // Folder to store CSV files
+
+    public EmployeeAttendanceTracker() {
+        employeeData = new TreeMap<>();
+        attendanceRecords = new HashMap<>();
+        registeredEmployeeIds = new HashSet<>(); // Simulating storing employee IDs on server
+        // Dummy data: Registering some employees
+        registerEmployee("EMP332", "Shrawani Salave");
+        registerEmployee("EMP329", "Ruta Chaudhari");
+        registerEmployee("EMP331", "Saee Gade");
+        registerEmployee("EMP330", "Unnati Sabu");
+    }
+
+    // Method to register a new employee
+    private void registerEmployee(String employeeId, String employeeName) {
+        Scanner scanner = new Scanner(System.in);
+        try {
+            while (!employeeId.matches("EMP\\d{3}")) {
+                System.out.println("Invalid employee ID format. Please use the format EMPXXX.");
+                System.out.print("Enter employee ID: ");
+                employeeId = scanner.nextLine();
+            }
+
+            if (!registeredEmployeeIds.contains(employeeId)) {
+                registeredEmployeeIds.add(employeeId);
+                employeeData.put(employeeId, employeeName);
+            } else {
+                System.out.println("Employee ID already exists.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Method to record attendance
+    public void markAttendance(String employeeId) {
+        try {
+            // Check if the employee ID is registered
+            if (!registeredEmployeeIds.contains(employeeId)) {
+                System.out.println("Employee ID not found. Do you want to register? (yes/no)");
+                Scanner scanner = new Scanner(System.in);
+                String response = scanner.nextLine();
+                if (response.equalsIgnoreCase("yes")) {
+                    System.out.print("Enter employee name: ");
+                    String employeeName = scanner.nextLine();
+                    registerEmployee(employeeId, employeeName);
+                }
+                return;
+            }
+
+            LocalDate currentDate = LocalDate.now();
+            attendanceRecords.putIfAbsent(currentDate, new LinkedHashSet<>());
+
+            // Check if the employee has already marked attendance for today
+            for (String entry : attendanceRecords.get(currentDate)) {
+                if (entry.contains("(" + employeeId + ")")) {
+                    System.out.println("Attendance already marked for " + employeeData.get(employeeId));
+                    return;
+                }
+            }
+
+            LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata")); // Get current time in IST
+            String entry = employeeData.get(employeeId) + " (" + employeeId + ") - " + formatTime(currentTime);
+            attendanceRecords.get(currentDate).add(entry);
+            System.out.println("Attendance marked for " + employeeData.get(employeeId));
+
+            // Write attendance to CSV file
+            writeToCSV(currentDate, entry);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Method to write attendance to CSV file
+    private void writeToCSV(LocalDate date, String entry) {
+        try {
+            String fileName = CSV_FOLDER + date.toString() + ".csv";
+            FileWriter writer = new FileWriter(fileName, true); // Append mode
+            writer.write(entry + "\n");
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error writing to CSV: " + e.getMessage());
+        }
+    }
+
+    // Method to print attendance for a given date
+    public void printAttendance(LocalDate date) {
+        try {
+            if (!attendanceRecords.containsKey(date)) {
+                System.out.println("No attendance recorded for " + date);
+                return;
+            }
+            System.out.println("\nEmployee Attendance for " + date + ":\n");
+            for (String entry : attendanceRecords.get(date)) {
+                System.out.println(entry);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Method to print record of all employees
+    public void printAllEmployees() {
+        try {
+            System.out.println("\nRecord of all employees:\n");
+            for (Map.Entry<String, String> entry : employeeData.entrySet()) {
+                System.out.println("Employee ID: " + entry.getKey() + ", Name: " + entry.getValue());
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Method to clear old records older than one month
+    public void clearOldRecords() {
+        try {
+            LocalDate oneMonthAgo = LocalDate.now().minusMonths(1);
+            for (Map.Entry<LocalDate, LinkedHashSet<String>> entry : attendanceRecords.entrySet()) {
+                LocalDate date = entry.getKey();
+                if (date.isBefore(oneMonthAgo)) {
+                    String fileName = CSV_FOLDER + date.toString() + ".csv";
+                    java.io.File file = new java.io.File(fileName);
+                    if (file.delete()) {
+                        attendanceRecords.remove(date);
+                        System.out.println("Deleted old records for " + date);
+                    } else {
+                        System.out.println("Failed to delete old records for " + date);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // Method to format time
+    private String formatTime(LocalDateTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return time.format(formatter);
+    }
+
+    // Method to start monitoring employee attendance
+    // Method to start monitoring employee attendance
+public void startMonitoring() {
+    Scanner scanner = new Scanner(System.in);
+
+    // Check if CSV file for today's date exists
+    LocalDate currentDate = LocalDate.now();
+    String fileName = CSV_FOLDER + currentDate.toString() + ".csv";
+    java.io.File file = new java.io.File(fileName);
+    boolean isFirstRun = !file.exists();
+
+    if (!isFirstRun) {
+        // If file exists, delete it and clear attendance records for today
+        if (!file.delete()) {
+            System.out.println("Failed to delete previous attendance data for today.");
+        }
+        attendanceRecords.remove(currentDate);
+    }
+
+    while (true) {
+        try {
+            System.out.println("\nMenu:");
+            System.out.println("1. Mark Attendance");
+            System.out.println("2. Register New Employee");
+            System.out.println("3. Print Today's Attendance");
+            System.out.println("4. Record of all employees");
+            System.out.println("5. Clear Old Records");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter employee ID to mark attendance: ");
+                    scanner.nextLine(); // Consume newline character
+                    String employeeId = scanner.nextLine();
+                    markAttendance(employeeId);
+                    break;
+                case 2:
+                    registerNewEmployee();
+                    break;
+                case 3:
+                    printAttendance(LocalDate.now());
+                    break;
+                case 4:
+                    printAllEmployees();
+                    break;
+                case 5:
+                    clearOldRecords();
+                    break;
+                case 6:
+                    System.out.println("Exiting program...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Returning to the menu...");
+            scanner.nextLine(); // Consume newline character
+        }
+    }
+}
+
+
+    // Method to register a new employee
+    private void registerNewEmployee() {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            String employeeId;
+            do {
+                System.out.print("Enter employee ID: ");
+                employeeId = scanner.nextLine();
+                if (!employeeId.matches("EMP\\d{3}")) {
+                    System.out.println("Invalid employee ID format. Please use the format EMPXXX.");
+                }
+            } while (!employeeId.matches("EMP\\d{3}"));
+
+            if (registeredEmployeeIds.contains(employeeId)) {
+                System.out.println("Employee ID already exists.");
+                return;
+            }
+
+            System.out.print("Enter employee name: ");
+            String employeeName = scanner.nextLine();
+            registerEmployee(employeeId, employeeName);
+            System.out.println("Employee " + employeeName + " with ID " + employeeId + " registered successfully.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+public class MainTracker {
+    public static void main(String[] args) {
+        try {
+            EmployeeAttendanceTracker attendanceTracker = new EmployeeAttendanceTracker();
+            attendanceTracker.startMonitoring();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
