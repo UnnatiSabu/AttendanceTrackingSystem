@@ -7,15 +7,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 class EmployeeAttendanceTracker {
-    private TreeMap<String, String> employeeData; // TreeMap to store employee data (ID -> Name)
-    private Map<LocalDate, LinkedHashSet<String>> attendanceRecords; // Map to store attendance records for each day and linkedhashset used to create new sample for new registration 
-    private Set<String> registeredEmployeeIds; // Set to store registered employee IDs
-    private final String CSV_FOLDER = "C:\\"; // Folder to store CSV files
+    private TreeMap<String, String> employeeData; 
+    private Map<LocalDate, LinkedHashSet<String>> attendanceRecords; 
+    private Set<String> registeredEmployeeIds; 
+    private final String CSV_FOLDER = "C:\\"; 
 
     public EmployeeAttendanceTracker() {
         employeeData = new TreeMap<>();
         attendanceRecords = new HashMap<>();
-        registeredEmployeeIds = new HashSet<>(); // Simulating storing employee IDs on server
+        registeredEmployeeIds = new HashSet<>(); 
+
         // Dummy data: Registering some employees
         registerEmployee("EMP332", "Shrawani Salave");
         registerEmployee("EMP329", "Ruta Chaudhari");
@@ -47,6 +48,7 @@ class EmployeeAttendanceTracker {
     // Method to record attendance
     public void markAttendance(String employeeId) {
         try {
+
             // Check if the employee ID is registered
             if (!registeredEmployeeIds.contains(employeeId)) {
                 System.out.println("Employee ID not found. Do you want to register? (yes/no)");
@@ -71,12 +73,11 @@ class EmployeeAttendanceTracker {
                 }
             }
 
-            LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata")); // Get current time in IST
+            LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata")); 
             String entry = employeeData.get(employeeId) + " (" + employeeId + ") - " + formatTime(currentTime);
             attendanceRecords.get(currentDate).add(entry);
             System.out.println("Attendance marked for " + employeeData.get(employeeId));
 
-            // Write attendance to CSV file
             writeToCSV(currentDate, entry);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -87,7 +88,7 @@ class EmployeeAttendanceTracker {
     private void writeToCSV(LocalDate date, String entry) {
         try {
             String fileName = CSV_FOLDER + date.toString() + ".csv";
-            FileWriter writer = new FileWriter(fileName, true); // Append mode
+            FileWriter writer = new FileWriter(fileName, true); 
             writer.write(entry + "\n");
             writer.close();
         } catch (IOException e) {
@@ -152,70 +153,68 @@ class EmployeeAttendanceTracker {
     }
 
     // Method to start monitoring employee attendance
-    // Method to start monitoring employee attendance
-public void startMonitoring() {
-    Scanner scanner = new Scanner(System.in);
-
-    // Check if CSV file for today's date exists
-    LocalDate currentDate = LocalDate.now();
-    String fileName = CSV_FOLDER + currentDate.toString() + ".csv";
-    java.io.File file = new java.io.File(fileName);
-    boolean isFirstRun = !file.exists();
-
-    if (!isFirstRun) {
-        // If file exists, delete it and clear attendance records for today
-        if (!file.delete()) {
-            System.out.println("Failed to delete previous attendance data for today.");
-        }
-        attendanceRecords.remove(currentDate);
-    }
-
-    while (true) {
-        try {
-            System.out.println("\nMenu:");
-            System.out.println("1. Mark Attendance");
-            System.out.println("2. Register New Employee");
-            System.out.println("3. Print Today's Attendance");
-            System.out.println("4. Record of all employees");
-            System.out.println("5. Clear Old Records");
-            System.out.println("6. Exit");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter employee ID to mark attendance: ");
-                    scanner.nextLine(); // Consume newline character
-                    String employeeId = scanner.nextLine();
-                    markAttendance(employeeId);
-                    break;
-                case 2:
-                    registerNewEmployee();
-                    break;
-                case 3:
-                    printAttendance(LocalDate.now());
-                    break;
-                case 4:
-                    printAllEmployees();
-                    break;
-                case 5:
-                    clearOldRecords();
-                    break;
-                case 6:
-                    System.out.println("Exiting program...");
-                    scanner.close();
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+    public void startMonitoring() {
+        Scanner scanner = new Scanner(System.in);
+    
+        // Check if CSV file for today's date exists
+        LocalDate currentDate = LocalDate.now();
+        String fileName = CSV_FOLDER + currentDate.toString() + ".csv";
+        java.io.File file = new java.io.File(fileName);
+        boolean isFirstRun = !file.exists();
+    
+        if (!isFirstRun) {
+            // If file exists, delete it and clear attendance records for today
+            if (!file.delete()) {
+                System.out.println("Failed to delete previous attendance data for today.");
             }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            System.out.println("Returning to the menu...");
-            scanner.nextLine(); // Consume newline character
+            attendanceRecords.remove(currentDate);
+        }
+    
+        while (true) {
+            try {
+                System.out.println("\nMenu:");
+                System.out.println("1. Mark Attendance");
+                System.out.println("2. Register New Employee");
+                System.out.println("3. Print Today's Attendance");
+                System.out.println("4. Record of all employees");
+                System.out.println("5. Clear Old Records");
+                System.out.println("6. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+    
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter employee ID to mark attendance: ");
+                        scanner.nextLine();
+                        String employeeId = scanner.nextLine();
+                        markAttendance(employeeId);
+                        break;
+                    case 2:
+                        registerNewEmployee();
+                        break;
+                    case 3:
+                        printAttendance(LocalDate.now());
+                        break;
+                    case 4:
+                        printAllEmployees();
+                        break;
+                    case 5:
+                        clearOldRecords();
+                        break;
+                    case 6:
+                        System.out.println("Exiting program...");
+                        scanner.close();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+                System.out.println("Returning to the menu...");
+                scanner.nextLine(); 
+            }
         }
     }
-}
-
 
     // Method to register a new employee
     private void registerNewEmployee() {
