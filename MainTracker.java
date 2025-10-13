@@ -109,12 +109,16 @@ class EmployeeAttendanceTracker {
             return;
         }
         System.out.println("\nAttendance for " + date + ":\n");
-        attendanceRecords.get(date).forEach(System.out::println);
+        for (String entry : attendanceRecords.get(date)) {
+            System.out.println(entry);
+        }
     }
 
     public void printAllEmployees() {
         System.out.println("\nAll registered employees:\n");
-        employeeData.forEach((id, name) -> System.out.println("Employee ID: " + id + ", Name: " + name));
+        for (Map.Entry<String, String> entry : employeeData.entrySet()) {
+            System.out.println("Employee ID: " + entry.getKey() + ", Name: " + entry.getValue());
+        }
     }
 
     // -------------------- Clear Old Records --------------------
@@ -196,3 +200,4 @@ public class MainTracker {
         tracker.startMonitoring();
     }
 }
+
