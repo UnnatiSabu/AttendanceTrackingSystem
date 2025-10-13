@@ -8,11 +8,11 @@ import java.util.*;
 
 class EmployeeAttendanceTracker {
     private TreeMap<String, String> employeeData; // ID -> Name
-    private HashMap<LocalDate, LinkedHashSet<String>> attendanceRecords; // Today's attendance entries
-    private HashMap<LocalDate, HashSet<String>> attendanceIds; // O(1) check for IDs
+    private HashMap<LocalDate, LinkedHashSet<String>> attendanceRecords; // Datewise attendance of employees
+    private HashMap<LocalDate, HashSet<String>> attendanceIds; // To check the attendance marking of XYZ Employee ID
     private HashSet<String> registeredEmployeeIds; // Set of registered employee IDs
-    private final String CSV_FOLDER = "D:\\Programming\\Projects\\Employee_Attendance_Tracking_Java\\Attendance\\";
-    private Scanner scanner; // Single Scanner instance
+    private final String CSV_FOLDER = "C:\\"; // Paste your path to avoid "Denied Access" Error
+    private Scanner scanner; 
 
     public EmployeeAttendanceTracker() {
         employeeData = new TreeMap<>();
@@ -77,7 +77,6 @@ class EmployeeAttendanceTracker {
             attendanceRecords.putIfAbsent(today, new LinkedHashSet<>());
             attendanceIds.putIfAbsent(today, new HashSet<>());
 
-            // O(1) check for duplicate attendance
             if (attendanceIds.get(today).contains(employeeId)) {
                 System.out.println("Attendance already marked for " + employeeData.get(employeeId));
                 return;
@@ -141,7 +140,7 @@ class EmployeeAttendanceTracker {
         System.out.println("Old record cleanup completed.");
     }
 
-    // -------------------- Utilities --------------------
+    // -------------------- Format Time For Better Display --------------------
     private String formatTime(LocalDateTime time) {
         return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -162,20 +161,27 @@ class EmployeeAttendanceTracker {
                 int choice = Integer.parseInt(scanner.nextLine());
 
                 switch (choice) {
-                    case 1 -> {
+                    case 1: 
                         System.out.print("Enter employee ID: ");
                         String empId = scanner.nextLine();
                         markAttendance(empId);
-                    }
-                    case 2 -> registerNewEmployee();
-                    case 3 -> printAttendance(LocalDate.now());
-                    case 4 -> printAllEmployees();
-                    case 5 -> clearOldRecords();
-                    case 6 -> {
+                        break; 
+                    case 2: 
+                        registerNewEmployee();
+                        break;
+                    case 3: 
+                        printAttendance(LocalDate.now());
+                        break;
+                    case 4: 
+                        printAllEmployees();
+                        break;
+                    case 5: 
+                        clearOldRecords();
+                        break;
+                    case 6: 
                         System.out.println("Exiting...");
                         return;
-                    }
-                    default -> System.out.println("Invalid choice. Enter 1-6.");
+                    default: System.out.println("Invalid choice. Enter 1-6.");
                 }
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage() + ". Returning to menu...");
@@ -191,3 +197,4 @@ public class MainTracker {
         tracker.startMonitoring();
     }
 }
+
