@@ -8,11 +8,11 @@ import java.util.*;
 
 class EmployeeAttendanceTracker {
     private TreeMap<String, String> employeeData; // ID -> Name
-    private HashMap<LocalDate, LinkedHashSet<String>> attendanceRecords; // Datewise attendance of employees
-    private HashMap<LocalDate, HashSet<String>> attendanceIds; // To check the attendance marking of XYZ Employee ID
+    private HashMap<LocalDate, LinkedHashSet<String>> attendanceRecords; // Today's attendance entries
+    private HashMap<LocalDate, HashSet<String>> attendanceIds; // O(1) check for IDs
     private HashSet<String> registeredEmployeeIds; // Set of registered employee IDs
-    private final String CSV_FOLDER = "C:\\"; // Paste your path to avoid "Denied Access" Error
-    private Scanner scanner; 
+    private final String CSV_FOLDER = "D:\\Programming\\Projects\\Employee_Attendance_Tracking_Java\\Attendance\\";
+    private Scanner scanner; // Single Scanner instance
 
     public EmployeeAttendanceTracker() {
         employeeData = new TreeMap<>();
@@ -46,7 +46,8 @@ class EmployeeAttendanceTracker {
             System.out.print("Enter employee name: ");
             String employeeName = scanner.nextLine();
 
-            registerEmployee(employeeId, employeeName);
+            registeredEmployeeIds.add(employeeId);
+            employeeData.put(employeeId, employeeName);
             System.out.println("Employee " + employeeName + " (" + employeeId + ") registered successfully.");
         } catch (Exception e) {
             System.out.println("Error in registration: " + e.getMessage());
@@ -65,9 +66,7 @@ class EmployeeAttendanceTracker {
                 System.out.println("Employee ID not found. Register? (yes/no)");
                 String response = scanner.nextLine();
                 if (response.equalsIgnoreCase("yes")) {
-                    System.out.print("Enter employee name: ");
-                    String name = scanner.nextLine();
-                    registerEmployee(employeeId, name);
+                    registerNewEmployee();
                 } else {
                     return;
                 }
@@ -140,7 +139,7 @@ class EmployeeAttendanceTracker {
         System.out.println("Old record cleanup completed.");
     }
 
-    // -------------------- Format Time For Better Display --------------------
+    // -------------------- Utilities --------------------
     private String formatTime(LocalDateTime time) {
         return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
@@ -197,4 +196,3 @@ public class MainTracker {
         tracker.startMonitoring();
     }
 }
-
